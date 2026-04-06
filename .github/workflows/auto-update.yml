@@ -1,0 +1,49 @@
+name: Auto Update Cask
+
+on:
+  schedule:
+    # Check daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout tap repo
+        uses: actions/checkout@v4
+
+      - name: Check for updates
+        id: check
+        run: |
+          REPO="wxtsky/CodeIsland"
+          LATEST=$(curl -s "https://api.github.com/repos/$REPO/releases/latest" | grep '"tag_name":' | sed -E 's/.*"v?([^"]+)".*/\1/')
+          CURRENT=$(grep 'version ' Casks/codeisland.rb | sed -E 's/.*"(.*)".*/\1/')
+          
+          echo "latest=$LATEST" >> $GITHUB_OUTPUT
+          echo "current=$CURRENT" >> $GITHUB_OUTPUT
+          
+          if [ "$LATEST" != "$CURRENT" ]; then
+            echo "Update needed: $CURRENT -> $LATEST"
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+          else
+            echo "No update needed"
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update cask
+        if: steps.check.outputs.needs_update == 'true'
+        run: |
+          chmod +x scripts/update-cask.sh
+          ./scripts/update-cask.sh
+
+      - name: Commit and push
+        if: steps.check.outputs.needs_update == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Casks/codeisland.rb
+          git commit -m "chore: update codeisland to ${{ steps.check.outputs.latest }}"
+          git push
