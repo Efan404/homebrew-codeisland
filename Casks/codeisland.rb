@@ -1,8 +1,8 @@
 cask "codeisland" do
-  version "1.0.4"
-  sha256 "6bb844f25d8a0fd4603aa3779f91349a349aebb64711f8257d01e410b671aea8"
+  version "1.0.5"
+  sha256 "3a9e161e04f971c14b5eb9a6a6ba35a871555a0681bf017087891f7843333ca4"
 
-  url "https://github.com/wxtsky/CodeIsland/releases/download/v#{version}/CodeIsland-#{version}.dmg"
+  url "https://github.com/wxtsky/CodeIsland/releases/download/v#{version}/CodeIsland.dmg"
   name "CodeIsland"
   desc "Real-time AI coding agent status panel for macOS Dynamic Island"
   homepage "https://github.com/wxtsky/CodeIsland"
